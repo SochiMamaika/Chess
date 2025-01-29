@@ -33,7 +33,7 @@ export default function OpponentSelectionPage() {
             <OnlineUsersList users={onlineUsers} onSelectOpponent={handleSelectOpponent} />
           </div>
           {selectedOpponent && (
-            <div className="md:w-[300px]">
+            <div className="md:w-[400px]">
               <OpponentCard opponent={selectedOpponent} />
             </div>
           )}

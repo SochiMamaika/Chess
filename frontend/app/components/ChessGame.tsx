@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback, useRef } from "react"
+import { useRouter } from "next/navigation"; // Используем next/navigation вместо next/router
 import { Chessground as ChessgroundApi } from "chessground"
 import { Chess } from "chess.js"
 import { Button } from "@/components/ui/button"
@@ -13,6 +14,7 @@ export function ChessGame() {
   const [moveHistory, setMoveHistory] = useState<string[]>([])
   const chess = useRef(new Chess()) // Используем useRef, чтобы избежать повторных рендеров
   const chessground = useRef<ChessgroundApi | null>(null)
+  const router = useRouter(); // Используем useRouter из next/navigation
 
   // getDests не зависит от fen
   const getDests = useCallback(() => {
@@ -90,11 +92,30 @@ export function ChessGame() {
   }, [fen, getDests, handleMove]) // dependencies, no unnecessary renders
 
   const resetGame = useCallback(() => {
-    chess.current.reset()
+    chess.current.reset();
+    const newFen = chess.current.fen();
+    setFen(newFen);
+    setGameOver("");
+    setMoveHistory([]);
+    if (chessground.current) {
+      chessground.current.set({
+        fen: newFen,
+        turnColor: "white",
+        movable: {
+          color: "white",
+          dests: getDests(),
+        },
+      });
+    }
+    router.push("/chess"); // Перенаправление на /chess
+  }, [getDests, router]); // Добавьте router в зависимости
+
+  const undoMove = useCallback(() => {
+    chess.current.undo()
     const newFen = chess.current.fen()
     setFen(newFen)
     setGameOver("")
-    setMoveHistory([])
+    setMoveHistory((prev) => prev.slice(0, -1))
     if (chessground.current) {
       chessground.current.set({
         fen: newFen,
@@ -107,32 +128,12 @@ export function ChessGame() {
     }
   }, [getDests])
 
-  const undoMove = useCallback(() => {
-    chess.current.undo()
-    const newFen = chess.current.fen()
-    setFen(newFen)
-    setGameOver("")
-    setMoveHistory((prev) => prev.slice(0, -1))
-    if (chessground.current) {
-      chessground.current.set({
-        fen: newFen,
-        turnColor: chess.current.turn() === "w" ? "white" : "black",
-        movable: {
-          color: chess.current.turn() === "w" ? "white" : "black",
-          dests: getDests(),
-        },
-      })
-    }
-  }, [getDests])
-
   return (
     <div className="flex flex-col md:flex-row items-start gap-6">
       <div className="flex flex-col items-center gap-4">
         <div className="flex gap-4">
           <Button onClick={resetGame}>Новая игра</Button>
-          <Button onClick={undoMove} variant="outline" disabled={moveHistory.length === 0}>
-            Отменить ход
-          </Button>
+          <Button onClick={undoMove}>Отменить ход</Button>
         </div>
         <Card className="p-4">
           <div id="chessground" style={{ width: "500px", height: "500px" }}></div>
@@ -144,7 +145,7 @@ export function ChessGame() {
         <ScrollArea className="h-[400px] w-full rounded-md border p-4">
           <h3 className="font-semibold mb-2">История ходов:</h3>
           {moveHistory.map((move, index) => (
-            <div key={index} className="text-sm">
+            <div key={index} className="text-md">
               {move}
             </div>
           ))}

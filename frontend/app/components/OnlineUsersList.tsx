@@ -3,7 +3,6 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import type { UserInfo } from "../types/user"
 
 interface OnlineUsersListProps {
@@ -30,7 +29,7 @@ export function OnlineUsersList({ users, onSelectOpponent }: OnlineUsersListProp
           <CardContent className="p-4 flex items-center space-x-4">
             <div className="flex-grow">
               <h3 className="font-semibold">{user.username}</h3>
-              <p className="text-sm text-gray-500">Рейтинг: {user.rating}</p>
+              <p className="text-md text-gray-500">Рейтинг: {user.rating}</p>
             </div>
             <Button onClick={() => handleSelectUser(user)}>Выбрать</Button>
           </CardContent>

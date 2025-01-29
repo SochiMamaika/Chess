@@ -81,9 +81,6 @@ export function LoginForm() {
             Зарегистрироваться
           </Link>
         </p>
-        <Link href="/forgot-password" className="text-sm text-muted-foreground hover:underline">
-          Забыли пароль?
-        </Link>
       </CardFooter>
     </Card>
   )
